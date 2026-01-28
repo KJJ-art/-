@@ -28,9 +28,9 @@ my-db-project/
 #### ① Flask 애플리케이션 (`app.py`)
 
 ```python
-from flask import Flask, render_template_string
-import pymysql
-import os
+from(더큰걸를 말한다) flask import Flask, render_template_string
+import pymysql(파이썬에서 sql에 붙게끔 하는거)
+import os(프로그램 안에 보이지 않게 변수로 가져와라)
 
 app = Flask(__name__)
 
@@ -40,8 +40,8 @@ DB_USER = os.environ.get('DB_USER', 'admin')
 DB_PASS = os.environ.get('DB_PASSWORD', 'admin123')
 DB_NAME = os.environ.get('DB_NAME', 'employees')
 
-def get_db_connection():
-    return pymysql.connect(
+def get_db_connection():(접속하는 변수)
+    return(db에 각 정보를 싹 주고 맞으면 접속한다) pymysql.connect(
         host=DB_HOST,
         user=DB_USER,
         password=DB_PASS,
@@ -57,23 +57,23 @@ def index():
         with conn.cursor() as cursor:
             # 부서 정보를 가져오는 SQL 쿼리 실행
             sql = "SELECT dept_no, dept_name FROM departments"
-            cursor.execute(sql)
+            cursor.execute(sql)    ---db에서는 한 행을 레코드라고 한다 이 한줄한줄을 가져오는걸 커서(cursor)라고 한다
             results = cursor.fetchall()
         conn.close()
         
-        # 결과를 HTML 테이블로 렌더링
+        # 결과를 HTML 테이블로 렌더링(랭더링은 줄이 바뀌면 어떻게 트림을 할것이야 배치는 어떻게 할것이야 처럼 html도 바꿔주는거다)
         html = """
         <h1>부서 목록 (DB Query Result)</h1>
         <table border="1">
             <tr><th>부서번호</th><th>부서명</th></tr>
-            {% for row in results %}
-            <tr><td>{{ row.dept_no }}</td><td>{{ row.dept_name }}</td></tr>
+            {% for row in results %}   --{%은 진자, for는 ~동안 게속 반복하겠다는 거다, results값이 한줄이야 여러줄이야 보는거다, 
+            <tr><td>{{ row.dept_no }}</td><td>{{ row.dept_name }}</td></tr> ---첫번째줄 두번쨰줄 게속 반복해서 처음과 끝을 가져              와 라 없으면 나가라
             {% endfor %}
         </table>
         """
         return render_template_string(html, results=results)
     except Exception as e:
-        return f"DB 연결 실패: {str(e)}"
+        return f"DB 연결 실패: {str(e)}"(db를 가져오는데 안되면 '연결실패':이유나 결과값을 표시해라)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
@@ -105,7 +105,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 5000번 포트 노출
-EXPOSE 5000
+EXPOSE(포트다) 5000
 
 # Flask 앱 실행
 CMD ["python", "app.py"]
@@ -117,7 +117,7 @@ CMD ["python", "app.py"]
 ```yaml
 services:
   web:
-    build: .
+    build: . 
     ports:
       - "8080:5000"
     environment:
@@ -125,23 +125,23 @@ services:
       - DB_NAME=employees
       - DB_USER=admin
       - DB_PASSWORD=admin123
-    depends_on:
+    depends_on:(
       db:
-        condition: service_healthy # DB가 완전히 준비된 후 웹 서버 실행
+        condition: service_healthy(db가 건강하게 서비스 올라왔냐 왜? bd가 없으면 게속 에러 메세지를 보내거나 db가 없다고 인식하고 나중에 db올려도 db업다고 할것이다) # DB가 완전히 준비된 후 웹 서버 실행
 
   db:
     image: mysql:8.0
     restart: always
     environment:
-      - MYSQL_DATABASE=employees
-      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_DATABASE=employees --나는 employees를 가져오겠다
+      - MYSQL_ROOT_PASSWORD=root_pass --어드민계정
       - MYSQL_USER=admin
       - MYSQL_PASSWORD=admin123
     ports:
       - "3306:3306"
     volumes:
       # 초기 SQL 파일을 컨테이너 내 예약된 경로에 마운트 (자동 주입)
-      - ./db/employees.sql:/docker-entrypoint-initdb.d/employees.sql
+      - ./db/employees.sql:/docker-entrypoint-initdb.d/employees.sql --employess.sql이 어딨냐? /docker-entrypoint-initdb.d/employees.sql <-여깄다 라는걸 표현한거다
       - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
